@@ -16,10 +16,12 @@ from src.titles import Title
 # нужную из кампаний переместите на последнюю позицию
 # т.е. в таком варианте генерация будет для stolishnici
 # скрипт будет брать заголовки, тексты и фото из соответсвующего каталога
-company = 'russian_fartuks'
 company = 'stolishnici'
 company = 'new_account'
 company = 'artel'
+company = 'russian_fartuks'
+company = 'artel'
+
 # -----------------------------------------------------
 
 
@@ -83,6 +85,8 @@ def create_avito_feed(common_ad_list, common_data):
         Address = ET.Element('Address')
         Category = ET.Element('Category')
         GoodsType = ET.Element('GoodsType')
+        GoodsSubType = ET.Element('GoodsSubType')
+        ComponentsType = ET.Element('ComponentsType')
         Condition = ET.Element('Condition')
         Availability = ET.Element('Availability')
         Title = ET.Element('Title')
@@ -104,6 +108,12 @@ def create_avito_feed(common_ad_list, common_data):
         Address.text = ad['Address']
         Category.text = common_data['Category']
         GoodsType.text = common_data['GoodsType']
+
+        if ad['product'] == 'stol' or ad['product'] == 'um':
+            GoodsSubType.text = common_data['GoodsSubType']
+            ComponentsType.text = 'Столешницы'
+
+
         Condition.text = common_data['Condition']
         Availability.text = 'Под заказ'
         Title.text = ad['name']
@@ -136,6 +146,9 @@ def create_avito_feed(common_ad_list, common_data):
         offer.append(Address)
         offer.append(Category)
         offer.append(GoodsType)
+        if ad['product'] == 'stol' or ad['product'] == 'um':
+            offer.append(GoodsSubType)
+            offer.append(ComponentsType)
         offer.append(Condition)
         offer.append(Availability)
         offer.append(Title)
