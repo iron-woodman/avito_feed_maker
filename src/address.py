@@ -21,7 +21,7 @@ class Address:
         загрузить список всех адресов по московской области
         :return:
         """
-        file = f'company/{self.company_name}/address/moskva.txt'
+        file = f'company/{self.company_name}/address/moskva_metro.txt'
         self.moskow_address = self.load_address_set(file)
 
 

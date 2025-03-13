@@ -14,7 +14,7 @@ class Img:
 
     def load_url_set(self, file):
         with open(file, 'r', encoding='utf-8') as f:
-            data = set(f.read().split('\n'))
+            data = set(f.readlines())
             return data
 
 

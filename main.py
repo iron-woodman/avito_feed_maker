@@ -20,23 +20,23 @@ company = 'stolishnici'
 company = 'new_account'
 company = 'artel'
 company = 'russian_fartuks'
-company = 'artel'
+company = 'russian_fartuks'
 
 # -----------------------------------------------------
 
 
 #------------- кол-во объявлений -----------------------------------
-UM_AD_COUNT_M = 20  #кол-во объявлений по умывальниам по москве
-STOL_AD_COUNT_M = 200  #кол-во объявлений по столешницам по москве
-POD_AD_COUNT_M = 10  #кол-во объявлений по подоконникам по москве
+UM_AD_COUNT_M = 0  #кол-во объявлений по умывальниам по москве
+STOL_AD_COUNT_M = 82  #кол-во объявлений по столешницам по москве
+POD_AD_COUNT_M = 0  #кол-во объявлений по подоконникам по москве
 
-UM_AD_COUNT_MO = 20  #кол-во объявлений по умывальниам по мос. обл.
-STOL_AD_COUNT_MO = 200  #кол-во объявлений по столешницам по мос. обл.
-POD_AD_COUNT_MO = 10  #кол-во объявлений по подоконникам по мос. обл.
+UM_AD_COUNT_MO = 0  #кол-во объявлений по умывальниам по мос. обл.
+STOL_AD_COUNT_MO = 0  #кол-во объявлений по столешницам по мос. обл.
+POD_AD_COUNT_MO = 0  #кол-во объявлений по подоконникам по мос. обл.
 # -------------------------------------------------------------------
 
-ARTICUL_PART = 'jun-' # префикс артикула
-AD_START_ID = 23000 # стартовое значение числовой части артикула
+ARTICUL_PART = 'mar-' # префикс артикула
+AD_START_ID = 800000 # стартовое значение числовой части артикула
 
 #  общие настройки генерации для данной кампании (номер тлф., фио менеджера и т.д.)
 COMMON_JSON_FILE = f'company/{company}/common_data.json'
@@ -97,6 +97,11 @@ def create_avito_feed(common_ad_list, common_data):
         Image3 = ET.Element('Image')
         Image4 = ET.Element('Image')
         Image5 = ET.Element('Image')
+        Image6 = ET.Element('Image')
+        Image7 = ET.Element('Image')
+        Image8 = ET.Element('Image')
+        Image9 = ET.Element('Image')
+        Image10 = ET.Element('Image')
 
 
         Id.text = ad['Id']
@@ -123,6 +128,13 @@ def create_avito_feed(common_ad_list, common_data):
         Image2.set('url', ad['Image2'])
         Image3.set('url', ad['Image3'])
         Image4.set('url', ad['Image4'])
+        Image5.set('url', ad['Image5'])
+        Image6.set('url', ad['Image6'])
+        Image7.set('url', ad['Image7'])
+        Image8.set('url', ad['Image8'])
+        Image9.set('url', ad['Image9'])
+        Image10.set('url', ad['Image10'])
+
 
 
         Images = ET.Element('Images')
@@ -130,6 +142,13 @@ def create_avito_feed(common_ad_list, common_data):
         Images.append(Image2)
         Images.append(Image3)
         Images.append(Image4)
+        Images.append(Image5)
+        Images.append(Image6)
+        Images.append(Image7)
+        Images.append(Image8)
+        Images.append(Image9)
+        Images.append(Image10)
+
 
 
         ad_description = ad['description'] + f"{ad['Articul']}\n"
@@ -183,46 +202,58 @@ def write_stat(common_ad_list_count):
         print("умывальники (Москва):", POD_AD_COUNT_M)
         print("умывальники (Мос.обл.):", POD_AD_COUNT_MO)
 
+
 def union_lists(list1: list, list2: list) -> list:
     """
-    объединение списков с равномерным распределением элементов внутри них
-    :param list1:
-    :param list2:
-    :return:
+    Объединение списков с равномерным распределением элементов внутри них.
+    Предусмотрен вариант, когда один из списков пустой.
+
+    :param list1: Первый список.
+    :param list2: Второй список.
+    :return: Объединенный список.
     """
-    res_list=[]
+    res_list = []
+
+    if not list1:
+        return list2[:]  # Возвращаем копию list2, чтобы не менять исходный список
+    if not list2:
+        return list1[:]  # Возвращаем копию list1, чтобы не менять исходный список
+
     big_list = []
     small_list = []
 
     if len(list1) > len(list2):
-        proportion = int(len(list1) / len(list2))
-        small_list = list2
         big_list = list1
+        small_list = list2
+        proportion = len(list1) // len(list2)  # Целочисленное деление
     else:
-        proportion = int(len(list2) / len(list1))
-        small_list = list1
         big_list = list2
+        small_list = list1
+        proportion = len(list2) // len(list1)  # Целочисленное деление
 
     big_list_elements_counter = 0
+    small_list_index = 0
+
     for item in big_list:
         res_list.append(item)
         big_list_elements_counter += 1
-        if big_list_elements_counter == proportion:
-            if len(small_list) > 0:
-                res_list.append(small_list[0])
-                small_list.remove(small_list[0])
+        if small_list_index < len(small_list) and big_list_elements_counter == proportion:
+            res_list.append(small_list[small_list_index])
+            small_list_index += 1
             big_list_elements_counter = 0
 
-    while len(small_list) > 0:
-        res_list.insert(random.randint(0, len(res_list)), small_list[0])
-        small_list.remove(small_list[0])
+    # Добавляем оставшиеся элементы из small_list, если они есть
+    while small_list_index < len(small_list):
+         res_list.append(small_list[small_list_index])
+         small_list_index += 1
 
     return res_list
+
 
 if __name__ == "__main__":
     common_data = load_json_data(COMMON_JSON_FILE)  # общие параметры
     text = Text(company_name=company, products=['podokonnik', 'stol', 'um'])
-    img = Img(company_name=company, products=['podokonnik', 'stol', 'um'], img_count=4)
+    img = Img(company_name=company, products=['podokonnik', 'stol', 'um'], img_count=10)
     address = Address(company_name=company)
     characteristics = Characteristics('colors.txt')
     price = Price()
@@ -275,6 +306,12 @@ if __name__ == "__main__":
         ad['Image2'] = BASE_IMG_URL + img.get_url(product, 2)
         ad['Image3'] = BASE_IMG_URL + img.get_url(product, 3)
         ad['Image4'] = BASE_IMG_URL + img.get_url(product, 4)
+        ad['Image5'] = BASE_IMG_URL + img.get_url(product, 5)
+        ad['Image6'] = BASE_IMG_URL + img.get_url(product, 6)
+        ad['Image7'] = BASE_IMG_URL + img.get_url(product, 7)
+        ad['Image8'] = BASE_IMG_URL + img.get_url(product, 8)
+        ad['Image9'] = BASE_IMG_URL + img.get_url(product, 9)
+        ad['Image10'] = BASE_IMG_URL + img.get_url(product, 10)
         ad['description'] = text.get_text(product).replace('{HEADER}', ad['name'])
         ad['Id'] = str(add_index + AD_START_ID)
         add_index += 1
@@ -291,6 +328,12 @@ if __name__ == "__main__":
         ad['Image2'] = BASE_IMG_URL + img.get_url(product, 2)
         ad['Image3'] = BASE_IMG_URL + img.get_url(product, 3)
         ad['Image4'] = BASE_IMG_URL + img.get_url(product, 4)
+        ad['Image5'] = BASE_IMG_URL + img.get_url(product, 5)
+        ad['Image6'] = BASE_IMG_URL + img.get_url(product, 6)
+        ad['Image7'] = BASE_IMG_URL + img.get_url(product, 7)
+        ad['Image8'] = BASE_IMG_URL + img.get_url(product, 8)
+        ad['Image9'] = BASE_IMG_URL + img.get_url(product, 9)
+        ad['Image10'] = BASE_IMG_URL + img.get_url(product, 10)
         ad['description'] = text.get_text(product).replace('{HEADER}', ad['name'])
         ad['Id'] = str(add_index + AD_START_ID)
         add_index += 1
